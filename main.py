@@ -5,6 +5,7 @@ import sys
 
 from aiogram import Bot
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
 from dotenv import load_dotenv
 
@@ -17,7 +18,8 @@ TOKEN = os.getenv('TOKEN')
 
 
 async def main() -> None:
-    bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    session = AiohttpSession(proxy='http://proxy.server:3128')
+    bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML), session=session)
     dp = create_dispatcher()
     await dp.start_polling(bot)
 
