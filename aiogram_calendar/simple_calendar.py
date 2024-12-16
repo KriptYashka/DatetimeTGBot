@@ -145,8 +145,7 @@ class SimpleCalendar(GenericCalendar):
         # processing empty buttons, answering with no action
         if data.act == SimpleCalAct.ignore:
             await query.answer(cache_time=60)
-            return return_data
-
+            return "Cancel", None
         temp_date = datetime(int(data.year), int(data.month), 1)
 
         # user picked a day button, return date

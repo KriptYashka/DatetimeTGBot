@@ -5,8 +5,12 @@ from aiogram.utils.markdown import hbold
 
 from routers.datetime_calc import router as r_calc
 
-dp = Dispatcher()
-dp.include_router(r_calc)
+def create_dispatcher():
+    dp = Dispatcher()
+    dp.include_router(r_calc)
+    return dp
+
+
 
 # # Примеры команд. TODO: Будут перенесены в другую папку
 # @dp.message(CommandStart())

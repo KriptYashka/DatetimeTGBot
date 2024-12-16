@@ -8,7 +8,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from dotenv import load_dotenv
 
-from dispatcher import dp
+from dispatcher import create_dispatcher
 
 
 
@@ -18,6 +18,7 @@ TOKEN = os.getenv('TOKEN')
 
 async def main() -> None:
     bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    dp = create_dispatcher()
     await dp.start_polling(bot)
 
 
