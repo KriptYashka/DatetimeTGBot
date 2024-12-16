@@ -145,7 +145,6 @@ class SimpleCalendar(GenericCalendar):
         # processing empty buttons, answering with no action
         if data.act == SimpleCalAct.ignore:
             await query.answer(cache_time=60)
-            return "Cancel", None
         temp_date = datetime(int(data.year), int(data.month), 1)
 
         # user picked a day button, return date
@@ -170,11 +169,13 @@ class SimpleCalendar(GenericCalendar):
             await self._update_calendar(query, next_date)
         if data.act == SimpleCalAct.today:
             next_date = datetime.now()
+            await self._update_calendar(query, next_date)
             if next_date.year != int(data.year) or next_date.month != int(data.month):
                 await self._update_calendar(query, datetime.now())
             else:
                 await query.answer(cache_time=60)
         if data.act == SimpleCalAct.cancel:
             await query.message.delete_reply_markup()
+            return "Cancel", None
         # at some point user clicks DAY button, returning date
         return return_data

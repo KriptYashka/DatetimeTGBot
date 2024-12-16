@@ -7,7 +7,7 @@ from aiogram.filters import CommandStart
 from aiogram.filters.callback_data import CallbackData
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup, CallbackQuery
+from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup, CallbackQuery, InputFile, URLInputFile
 from aiogram.utils.markdown import hbold
 
 from aiogram_calendar import SimpleCalendar, get_user_locale, SimpleCalendarCallback
@@ -67,10 +67,12 @@ async def process_start_calendar(callback_query: CallbackQuery, callback_data: C
             "Выберите вторую дату: ",
             reply_markup=await SimpleCalendar(locale=loc).start_calendar()
         )
+        await callback_query.message.delete()
     elif selected == "Cancel":
         await callback_query.message.answer(
             f'Отмена операции.'
         )
+        await callback_query.message.delete()
         await state.clear()
 
 @router.callback_query(SimpleCalendarCallback.filter(), Form.end_dt)
@@ -90,17 +92,21 @@ async def process_end_calendar(callback_query: CallbackQuery, callback_data: Cal
         diff_dt: timedelta = end_date - start_dt
         days = diff_dt.days
 
-        text = f"📆 Количество дней между выбранными датами: {days} \n\n"
+        text = f"От: {start_dt.strftime("%d/%m/%Y")}\nДо: {end_date.strftime("%d/%m/%Y")}\n📆 Количество дней между выбранными датами: {days} \n\n"
+
+
+
         await callback_query.message.answer(
             f'Конец: {end_date.strftime("%d/%m/%Y")}'
         )
-        await callback_query.message.answer(
-            text,
-            reply_markup=start_kb
-        )
+        await callback_query.message.delete()
+        photo = URLInputFile("https://freeimghost.net/images/2024/12/16/icon.jpg")
+        await callback_query.message.answer_photo(photo=photo, caption=text, reply_markup=start_kb, show_caption_above_media=True)
+
         await state.clear()
     elif selected == "Cancel":
         await callback_query.message.answer(
             f'Отмена операции.'
         )
+        await callback_query.message.delete()
         await state.clear()
