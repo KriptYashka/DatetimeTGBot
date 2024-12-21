@@ -14,10 +14,10 @@ from dispatcher import create_dispatcher
 
 load_dotenv()
 TOKEN = os.getenv('TOKEN')
+bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 
 
 async def main() -> None:
-    bot = Bot(TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = create_dispatcher()
     await dp.start_polling(bot)
 

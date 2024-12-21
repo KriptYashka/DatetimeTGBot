@@ -4,10 +4,12 @@ from aiogram.filters import CommandStart
 from aiogram.utils.markdown import hbold
 
 from routers.datetime_calc import router as r_calc
+from routers.datetime_msg import router as r_calc_msg
 
 def create_dispatcher():
     dp = Dispatcher()
     dp.include_router(r_calc)
+    dp.include_router(r_calc_msg)
     return dp
 
 
