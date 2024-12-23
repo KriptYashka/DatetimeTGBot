@@ -92,8 +92,7 @@ async def process_end_calendar(callback_query: CallbackQuery, callback_data: Cal
         diff_dt: timedelta = end_date - start_dt
         days = diff_dt.days
 
-        text = f"От: {start_dt.strftime("%d/%m/%Y")}\nДо: {end_date.strftime("%d/%m/%Y")}\n📆 Количество дней между выбранными датами: {days} \n\n"
-
+        text = f'От: {start_dt.strftime("%d/%m/%Y")}\nДо: {end_date.strftime("%d/%m/%Y")}\n📆 Количество дней между выбранными датами: {days} \n\n'
 
 
         await callback_query.message.answer(
