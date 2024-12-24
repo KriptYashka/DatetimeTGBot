@@ -32,9 +32,9 @@ class UserRepository:
             return task
 
     @classmethod
-    async def get_user_by_tg_id(cls, user_tg_id: str):
+    async def get_user_by_tg_id(cls, user_tg_id: str) -> UserOrm:
         async with new_session() as session:
             query = select(UserOrm).where(UserOrm.tg_id == user_tg_id)
             result = await session.execute(query)
-            task = result.scalars().first()
-            return task
+            user = result.scalars().first()
+            return user

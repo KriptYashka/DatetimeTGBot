@@ -9,8 +9,8 @@ from routers.admin.moderate_user import router as r_admin
 
 def create_dispatcher():
     dp = Dispatcher()
-    # dp.include_router(r_calc)
-    # dp.include_router(r_calc_msg)
+    dp.include_router(r_calc)
+    dp.include_router(r_calc_msg)
     dp.include_router(r_admin)
     return dp
 

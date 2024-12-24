@@ -11,6 +11,7 @@ from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup, Callback
 from aiogram.utils.markdown import hbold
 
 from aiogram_calendar import SimpleCalendar, get_user_locale, SimpleCalendarCallback
+from routers.admin.moderate_user import is_staff
 
 router = Router(name=__name__)
 
@@ -37,6 +38,9 @@ async def command_start_handler(message: Message) -> None:
 
 @router.message(F.text.lower() == 'подсчёт дней в промежутке')
 async def nav_cal_handler(message: Message, state: FSMContext):
+    if not await is_staff(message.from_user.username):
+        await message.reply(f"Функция недоступна")
+        return
     await state.set_state(Form.start_dt)
     loc = await get_user_locale(message.from_user)
     await state.update_data(loc=loc)

@@ -13,6 +13,8 @@ from aiogram.methods import ForwardMessages
 from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup, CallbackQuery, InputFile, URLInputFile
 from aiogram.utils.markdown import hbold
 
+from routers.admin.moderate_user import is_staff
+
 router = Router(name=__name__)
 
 
@@ -37,6 +39,10 @@ def get_timedelta_urls(*args) -> tuple[Optional[timedelta], str]:
 
 @router.message(Command("timedelta"))
 async def command_timedelta_handler(msg: Message, bot: aiogram.Bot, command: CommandObject) -> None:
+    if not await is_staff(msg.from_user.username):
+        await msg.reply(f"Функция недоступна")
+        return
+
     delta_date, status = get_timedelta_urls(*command.args.split())
     if delta_date is not None:
         await msg.reply(f"Прошло {abs(delta_date.days)} дней")
