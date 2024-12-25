@@ -20,16 +20,25 @@ class UserRepository:
             query = select(UserOrm)
             result = await session.execute(query)
             users_models = result.scalars().all()
-            tasks = [user_model for user_model in users_models]
-            return tasks
+            users = [user_model for user_model in users_models]
+            return users
+
+    @classmethod
+    async def get_staff_users(cls) -> list[UserOrm]:
+        async with new_session() as session:
+            query = select(UserOrm).where(UserOrm.is_staff)
+            result = await session.execute(query)
+            users_models = result.scalars().all()
+            users = [user_model for user_model in users_models]
+            return users
 
     @classmethod
     async def get_user_by_id(cls, user_id: int):
         async with new_session() as session:
             query = select(UserOrm).where(UserOrm.id == user_id)
             result = await session.execute(query)
-            task = result.scalars().first()
-            return task
+            user = result.scalars().first()
+            return user
 
     @classmethod
     async def get_user_by_tg_id(cls, user_tg_id: str) -> UserOrm:

@@ -35,7 +35,7 @@ class CommonMainState(BaseState):
 class AdminMainState(BaseState):
     buttons = [
         [
-            KeyboardButton(text=AdminText.SEE_MODERATOR)
+            KeyboardButton(text=AdminText.SHOW_MODERATORS)
         ],
         [
             KeyboardButton(text=AdminText.ADD_MODERATOR),

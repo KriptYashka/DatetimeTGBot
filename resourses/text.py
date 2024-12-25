@@ -1,5 +1,5 @@
 class AdminText:
-    SEE_MODERATOR = "Просмотр модераторов"
+    SHOW_MODERATORS = "Просмотр модераторов"
 
     ADD_MODERATOR = "Добавить модератора"
     ADD_MODERATOR_SELECT = "Введите никнейм пользователя, которого вы добавляете модератором"

@@ -62,3 +62,15 @@ async def command_add_moderator_handler(msg: Message, state: FSMContext):
     await UserRepository.create_user(user)
 
     await msg.reply(AdminText.ADD_MODERATOR_SUCCESS.format(tg_id))
+
+@router.message(F.text.lower() == AdminText.SHOW_MODERATORS.lower())
+async def command_show_moderators_handler(msg: Message):
+    users = await UserRepository.get_staff_users()
+    data_users = []
+    for index, user in enumerate(users):
+        dt: datetime = user.datetime_register
+
+        data = f"{index + 1}. {dt.strftime('%d/%m/%Y')} - @{user.tg_id}"
+        data_users.append(data)
+    text = "\n".join(data_users)
+    await msg.answer(text)
