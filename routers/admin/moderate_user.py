@@ -1,19 +1,16 @@
-import logging
 from datetime import datetime, timedelta
 from typing import Any, Optional, Union
-from aiogram.filters import CommandStart, Command
-from aiogram.filters.command import CommandObject
-from aiogram.filters.callback_data import CallbackData
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
-from aiogram.methods import ForwardMessages
 from aiogram.types import Message
 
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
 
 from models import UserOrm
 from repositories import UserRepository
+from resourses.phrase import AdminText
+from routers.admin.keyboard import AdminKeyboard
 
 router = Router(name=__name__)
 
@@ -34,11 +31,31 @@ async def is_staff(tg_id: str):
 #         return wrapper
 #     return decorator
 
-@router.message(Command("add_moderator"))
-async def command_add_moderator_handler(msg: Message, command: CommandObject):
-    tg_id = command.args.replace("@", "")
+@router.message(Command("admin"))
+async def command_admin_panel_handler(msg: Message):
+    kb = AdminKeyboard()
+    kb.main_state()
+    await msg.answer("Активирована панель администратора", reply_markup=kb.markup())
 
-    # TODO: В отдельный обработчик
+class AddModeratorFSM(StatesGroup):
+    select = State()
+
+@router.message(F.text.lower() == AdminText.ADD_MODERATOR.lower())
+async def command_select_moderator_handler(msg: Message, state: FSMContext):
+    await state.set_state(AddModeratorFSM.select)
+    kb = AdminKeyboard()
+    kb.input_state()
+    await msg.reply(AdminText.ADD_MODERATOR_SELECT, reply_markup=kb.markup())
+
+@router.message(AddModeratorFSM.select)
+async def command_add_moderator_handler(msg: Message, state: FSMContext):
+    await state.clear()
+    if msg.text == AdminText.CANCEL:
+        await msg.answer("Отмена операции")
+        await command_admin_panel_handler(msg)
+        return
+    tg_id = msg.text.replace("@", "").strip()
+
     data = {
         "tg_id": tg_id,
         "datetime_register": datetime.now(),
@@ -47,5 +64,5 @@ async def command_add_moderator_handler(msg: Message, command: CommandObject):
     user = UserOrm(**data)
     await UserRepository.create_user(user)
 
-    await msg.reply("Пользователь добавлен модератором")
+    await msg.reply(AdminText.ADD_MODERATOR_SUCCESS.format(tg_id))
 
