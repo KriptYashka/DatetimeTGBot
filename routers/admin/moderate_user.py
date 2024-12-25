@@ -35,16 +35,17 @@ async def command_admin_panel_handler(msg: Message):
     kb = AdminKeyboard().main_state()
     await msg.answer("Активирована панель администратора", reply_markup=kb.markup())
 
-class AddModeratorFSM(StatesGroup):
-    select = State()
+class ModeratorFSM(StatesGroup):
+    select_add = State()
+    select_delete = State()
 
 @router.message(F.text.lower() == AdminText.ADD_MODERATOR.lower())
 async def command_select_moderator_handler(msg: Message, state: FSMContext):
-    await state.set_state(AddModeratorFSM.select)
+    await state.set_state(ModeratorFSM.select_add)
     kb = AdminKeyboard().input_state()
     await msg.reply(AdminText.ADD_MODERATOR_SELECT, reply_markup=kb.markup())
 
-@router.message(AddModeratorFSM.select)
+@router.message(ModeratorFSM.select_add)
 async def command_add_moderator_handler(msg: Message, state: FSMContext):
     await state.clear()
     if msg.text == AdminText.CANCEL:
@@ -69,8 +70,28 @@ async def command_show_moderators_handler(msg: Message):
     data_users = []
     for index, user in enumerate(users):
         dt: datetime = user.datetime_register
-
         data = f"{index + 1}. {dt.strftime('%d/%m/%Y')} - @{user.tg_id}"
         data_users.append(data)
     text = "\n".join(data_users)
     await msg.answer(text)
+
+@router.message(F.text.lower() == AdminText.DELETE_MODERATOR.lower())
+async def command_delete_select_moderator_handler(msg: Message, state: FSMContext):
+    await state.set_state(ModeratorFSM.select_delete)
+    kb = AdminKeyboard().input_state()
+    await msg.reply(AdminText.DELETE_MODERATOR_SELECT, reply_markup=kb.markup())
+
+@router.message(ModeratorFSM.select_delete)
+async def command_delete_moderator_handler(msg: Message, state: FSMContext):
+    await state.clear()
+    if msg.text == AdminText.CANCEL:
+        await msg.answer("Отмена операции")
+        await command_admin_panel_handler(msg)
+        return
+
+    tg_id = msg.text.replace("@", "").strip()
+    await UserRepository.delete_user_by_tg_id(tg_id)
+
+    await msg.reply(
+        AdminText.DELETE_MODERATOR_SUCCESS.format(tg_id), reply_markup=AdminKeyboard().main_state().markup()
+    )
