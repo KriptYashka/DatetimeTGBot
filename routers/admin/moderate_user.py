@@ -13,6 +13,8 @@ from routers.keyboard.keyboards import AdminKeyboard
 
 router = Router(name=__name__)
 
+kb = AdminKeyboard()
+
 async def is_staff(tg_id: str):
     user = await UserRepository.get_user_by_tg_id(tg_id)
     if user is None:
@@ -32,8 +34,7 @@ async def is_staff(tg_id: str):
 
 @router.message(Command("admin"))
 async def command_admin_panel_handler(msg: Message):
-    kb = AdminKeyboard().main_state()
-    await msg.answer("Активирована панель администратора", reply_markup=kb.markup())
+    await msg.answer("Активирована панель администратора", reply_markup=kb.main_state().markup())
 
 class ModeratorFSM(StatesGroup):
     select_add = State()
@@ -42,8 +43,7 @@ class ModeratorFSM(StatesGroup):
 @router.message(F.text.lower() == AdminText.ADD_MODERATOR.lower())
 async def command_select_moderator_handler(msg: Message, state: FSMContext):
     await state.set_state(ModeratorFSM.select_add)
-    kb = AdminKeyboard().input_state()
-    await msg.reply(AdminText.ADD_MODERATOR_SELECT, reply_markup=kb.markup())
+    await msg.reply(AdminText.ADD_MODERATOR_SELECT, reply_markup=kb.input_state().markup())
 
 @router.message(ModeratorFSM.select_add)
 async def command_add_moderator_handler(msg: Message, state: FSMContext):
@@ -78,7 +78,6 @@ async def command_show_moderators_handler(msg: Message):
 @router.message(F.text.lower() == AdminText.DELETE_MODERATOR.lower())
 async def command_delete_select_moderator_handler(msg: Message, state: FSMContext):
     await state.set_state(ModeratorFSM.select_delete)
-    kb = AdminKeyboard().input_state()
     await msg.reply(AdminText.DELETE_MODERATOR_SELECT, reply_markup=kb.markup())
 
 @router.message(ModeratorFSM.select_delete)
