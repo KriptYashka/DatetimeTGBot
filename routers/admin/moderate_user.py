@@ -90,6 +90,7 @@ async def command_delete_moderator_handler(msg: Message, state: FSMContext):
         return
 
     tg_id = msg.text.replace("@", "").strip()
+    print("ID:" ,tg_id)
     await UserRepository.delete_user_by_tg_id(tg_id)
 
     await msg.reply(

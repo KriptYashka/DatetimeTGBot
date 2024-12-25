@@ -12,7 +12,7 @@ class BaseKeyboard:
 
     def set_state(self, state: Type[BaseState]):
         self.state = state
-        self.state.set_keyboard(self.builder)
+        self.builder = self.state.set_keyboard()
         return self
 
     def input_state(self):

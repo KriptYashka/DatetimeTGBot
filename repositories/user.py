@@ -1,5 +1,5 @@
 from typing import List
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, CursorResult
 
 from depends.datebase import new_session
 from models.user import UserOrm
@@ -52,5 +52,7 @@ class UserRepository:
     async def delete_user_by_tg_id(cls, user_tg_id: str):
         async with new_session() as session:
             query = delete(UserOrm).where(UserOrm.tg_id == user_tg_id)
-            result = await session.execute(query)
+            result: CursorResult = await session.execute(query)
+            await session.commit()
+            print(query)
             return result

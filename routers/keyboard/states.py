@@ -10,9 +10,12 @@ class BaseState(ABC):
     buttons: list[list[ReplyKeyboardBuilder]] = []
 
     @classmethod
-    def set_keyboard(cls, inline_keyboard: ReplyKeyboardBuilder):
+    def set_keyboard(cls):
+        keyboard = ReplyKeyboardBuilder()
         for row in cls.buttons:
-            inline_keyboard.row(*row)
+            keyboard.row(*row)
+        return keyboard
+
 
 
 class InputState(BaseState):
