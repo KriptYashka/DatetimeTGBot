@@ -6,12 +6,14 @@ from aiogram.utils.markdown import hbold
 from routers.datetime_calc import router as r_calc
 from routers.datetime_msg import router as r_calc_msg
 from routers.admin.moderate_user import router as r_admin
+from routers.common import router as r_common
 
 def create_dispatcher():
     dp = Dispatcher()
     dp.include_router(r_calc)
     dp.include_router(r_calc_msg)
     dp.include_router(r_admin)
+    dp.include_router(r_common)
     return dp
 
 

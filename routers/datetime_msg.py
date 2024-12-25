@@ -13,6 +13,7 @@ from aiogram.methods import ForwardMessages
 from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup, CallbackQuery, InputFile, URLInputFile
 from aiogram.utils.markdown import hbold
 
+from resourses.text import CalcDatetimeText
 from routers.admin.moderate_user import is_staff
 
 router = Router(name=__name__)
@@ -37,17 +38,17 @@ def get_timedelta_urls(*args) -> tuple[Optional[timedelta], str]:
         return None, "Ошибка в дате. Формат: `/timedelta 31.12.2024 12.05.2025`"
 
 
-@router.message(Command("timedelta"))
-async def command_timedelta_handler(msg: Message, bot: aiogram.Bot, command: CommandObject) -> None:
+@router.message(F.text.lower() == CalcDatetimeText.CALC_TEXT)
+async def command_timedelta_handler(msg: Message) -> None:
     if not await is_staff(msg.from_user.username):
         await msg.reply(f"Функция недоступна")
         return
 
-    delta_date, status = get_timedelta_urls(*command.args.split())
-    if delta_date is not None:
-        await msg.reply(f"Прошло {abs(delta_date.days)} дней")
-    else:
-        await msg.reply(status)
+    # delta_date, status = get_timedelta_urls(*command.args.split())
+    # if delta_date is not None:
+    #     await msg.reply(f"Прошло {abs(delta_date.days)} дней")
+    # else:
+    #     await msg.reply(status)
 
 
 

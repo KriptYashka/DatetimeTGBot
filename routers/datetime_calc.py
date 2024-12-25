@@ -11,7 +11,9 @@ from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup, Callback
 from aiogram.utils.markdown import hbold
 
 from aiogram_calendar import SimpleCalendar, get_user_locale, SimpleCalendarCallback
+from resourses.text import CalcDatetimeText, CalcDatetimeText
 from routers.admin.moderate_user import is_staff
+from routers.keyboard.keyboards import CommonKeyboard
 
 router = Router(name=__name__)
 
@@ -19,28 +21,19 @@ class Form(StatesGroup):
     start_dt = State()
     end_dt = State()
 
-kb = [
-    [
-        KeyboardButton(text='Подсчёт дней в промежутке'),
-    ],
-    [
-        KeyboardButton(text='В разработке'),
-    ],
-]
-start_kb = ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+kb = CommonKeyboard()
 
 @router.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
-    """
-    This handler receives messages with `/start` command
-    """
-    await message.reply(f"Приветствую, {hbold(message.from_user.full_name)}! Выбери одну из команд", reply_markup=start_kb)
+    text = f"Приветствую, {hbold(message.from_user.full_name)}! Выбери одну из команд"
+    await message.reply(text, reply_markup=kb.main_state().markup())
 
-@router.message(F.text.lower() == 'подсчёт дней в промежутке')
+@router.message(F.text.lower() == CalcDatetimeText.CALC_CALENDAR.lower())
 async def nav_cal_handler(message: Message, state: FSMContext):
     if not await is_staff(message.from_user.username):
         await message.reply(f"Функция недоступна")
         return
+
     await state.set_state(Form.start_dt)
     loc = await get_user_locale(message.from_user)
     await state.update_data(loc=loc)
@@ -104,7 +97,9 @@ async def process_end_calendar(callback_query: CallbackQuery, callback_data: Cal
         )
         await callback_query.message.delete()
         photo = URLInputFile("https://freeimghost.net/images/2024/12/16/icon.jpg")
-        await callback_query.message.answer_photo(photo=photo, caption=text, reply_markup=start_kb, show_caption_above_media=True)
+        await callback_query.message.answer_photo(
+            photo=photo, caption=text, reply_markup=kb.main_state().markup(), show_caption_above_media=True
+        )
 
         await state.clear()
     elif selected == "Cancel":

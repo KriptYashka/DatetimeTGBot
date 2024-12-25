@@ -10,4 +10,8 @@ class AdminText:
     DELETE_MODERATOR_SUCCESS = "Пользователь {} удален из модераторов"
 
     CANCEL = "Отмена"
+    BACK_TO_MAIN = "Вернуться в основное меню"
 
+class CalcDatetimeText:
+    CALC_CALENDAR = "Подсчёт дней: Календарь"
+    CALC_TEXT = "Подсчёт дней: Текст с постов"
