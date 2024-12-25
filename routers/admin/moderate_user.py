@@ -48,11 +48,12 @@ async def command_select_moderator_handler(msg: Message, state: FSMContext):
 @router.message(ModeratorFSM.select_add)
 async def command_add_moderator_handler(msg: Message, state: FSMContext):
     await state.clear()
-    if msg.text == AdminText.CANCEL:
+    if msg.text.lower() == AdminText.CANCEL.lower():
         await msg.answer("Отмена операции")
         await command_admin_panel_handler(msg)
         return
-    tg_id = msg.text.replace("@", "").strip()
+
+    tg_id = msg.text.replace("@", "").strip().lower()
 
     data = {
         "tg_id": tg_id,
@@ -62,7 +63,7 @@ async def command_add_moderator_handler(msg: Message, state: FSMContext):
     user = UserOrm(**data)
     await UserRepository.create_user(user)
 
-    await msg.reply(AdminText.ADD_MODERATOR_SUCCESS.format(tg_id))
+    await msg.reply(AdminText.ADD_MODERATOR_SUCCESS.format(tg_id), reply_markup=kb.main_state().markup())
 
 @router.message(F.text.lower() == AdminText.SHOW_MODERATORS.lower())
 async def command_show_moderators_handler(msg: Message):
@@ -93,5 +94,5 @@ async def command_delete_moderator_handler(msg: Message, state: FSMContext):
     await UserRepository.delete_user_by_tg_id(tg_id)
 
     await msg.reply(
-        AdminText.DELETE_MODERATOR_SUCCESS.format(tg_id), reply_markup=AdminKeyboard().main_state().markup()
+        AdminText.DELETE_MODERATOR_SUCCESS.format(tg_id), reply_markup=kb.main_state().markup()
     )

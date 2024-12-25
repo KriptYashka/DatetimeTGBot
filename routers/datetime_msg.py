@@ -13,14 +13,11 @@ from aiogram.methods import ForwardMessages
 from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup, CallbackQuery, InputFile, URLInputFile
 from aiogram.utils.markdown import hbold
 
-from resourses.text import CalcDatetimeText
+from resourses.text import CalcDatetimeText, AdminText
 from routers.admin.moderate_user import is_staff
+from routers.keyboard.keyboards import CommonKeyboard
 
 router = Router(name=__name__)
-
-
-# async def get_msg(url: str):
-#     await bot.get_chat().
 
 def str_to_datetime(s: str) -> Optional[datetime]:
     d, m, y = map(int, s.split("."))
@@ -37,37 +34,45 @@ def get_timedelta_urls(*args) -> tuple[Optional[timedelta], str]:
     except:
         return None, "Ошибка в дате. Формат: `/timedelta 31.12.2024 12.05.2025`"
 
+class MessageDateFSM(StatesGroup):
+    first = State()
+    second = State()
 
-@router.message(F.text.lower() == CalcDatetimeText.CALC_TEXT)
-async def command_timedelta_handler(msg: Message) -> None:
+@router.message(F.text.lower() == CalcDatetimeText.CALC_TEXT.lower())
+async def command_timedelta_handler(msg: Message, state: FSMContext) -> None:
     if not await is_staff(msg.from_user.username):
         await msg.reply(f"Функция недоступна")
         return
-
-    # delta_date, status = get_timedelta_urls(*command.args.split())
-    # if delta_date is not None:
-    #     await msg.reply(f"Прошло {abs(delta_date.days)} дней")
-    # else:
-    #     await msg.reply(status)
+    await state.set_state(MessageDateFSM.first)
+    await msg.reply("Введите первую дату", reply_markup=CommonKeyboard().input_state().markup())
 
 
+@router.message(MessageDateFSM.first)
+async def command_timedelta_first_handler(msg: Message, state: FSMContext):
+    text = msg.text or msg.caption
+    if text.lower() == AdminText.CANCEL.lower():
+        await msg.answer("Отмена операции", kb=CommonKeyboard().main_state().markup())
+        return
 
-# @router.message(Command("time"))
-# async def command_timedelta_forward_handler(msg: Message, bot: aiogram.Bot):
-#     messages = await bot.his
+    date_str = text.split()[0]
+    await state.update_data(first=date_str)
+    await state.set_state(MessageDateFSM.second)
+    await msg.reply("Введите вторую дату", reply_markup=CommonKeyboard().input_state().markup())
 
+@router.message(MessageDateFSM.second)
+async def command_timedelta_second_handler(msg: Message, state: FSMContext):
+    text = msg.text or msg.caption
+    if text.lower() == AdminText.CANCEL.lower():
+        await msg.answer("Отмена операции", kb=CommonKeyboard().main_state().markup())
+        return
 
-# async def command_timedelta_forward_first_handler(msg: list[Message], state: FSMContext):
-#     date_str = msg.text
-#     date2_str = await state.get_value("first")
-#     print(date2_str)
-#     if date2_str is None:
-#         await state.update_data(first=date_str)
-#         await msg.answer("Ожидание второго сообщения")
-#         return
-#     delta_date, status = get_timedelta_urls(date_str, date2_str)
-#     if delta_date is not None:
-#         await msg.reply(f"Прошло {abs(delta_date.days)} дней")
-#         await state.clear()
-#     else:
-#         await msg.reply(status)
+    date2_str = text.split()[0]
+    date1_str = await state.get_value("first")
+    delta_date, status = get_timedelta_urls(date1_str, date2_str)
+    await state.clear()
+    kb = CommonKeyboard().main_state()
+    if delta_date:
+        await msg.reply(f"Прошло {abs(delta_date.days)} дней", reply_markup=kb.markup())
+    else:
+        await msg.reply(status, reply_markup=kb.markup())
+

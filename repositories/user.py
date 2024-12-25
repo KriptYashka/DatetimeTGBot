@@ -54,5 +54,4 @@ class UserRepository:
             query = delete(UserOrm).where(UserOrm.tg_id == user_tg_id)
             result: CursorResult = await session.execute(query)
             await session.commit()
-            print(query)
             return result
