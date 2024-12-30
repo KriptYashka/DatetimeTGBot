@@ -1,5 +1,6 @@
 from typing import List
 from sqlalchemy import select, update, delete, CursorResult
+from sqlalchemy.dialects.mysql import insert
 
 from depends.datebase import new_session
 from models.user import UserOrm

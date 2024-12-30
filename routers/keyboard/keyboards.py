@@ -1,5 +1,6 @@
 from typing import Type
 
+from aiogram.types import KeyboardButton
 from aiogram.utils.keyboard import ReplyKeyboardBuilder
 
 from routers.keyboard.states import InputState, AdminMainState, BaseState, CommonMainState
@@ -24,9 +25,15 @@ class BaseKeyboard:
 class CommonKeyboard(BaseKeyboard):
     def __init__(self):
         super().__init__()
+        self.is_admin = False
 
     def main_state(self):
-        return self.set_state(CommonMainState)
+        self.set_state(CommonMainState)
+        if self.is_admin:
+            self.builder.row(
+                KeyboardButton(text="/admin")
+            )
+        return self
 
 
 class AdminKeyboard(BaseKeyboard):

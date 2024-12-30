@@ -1,4 +1,5 @@
 class AdminText:
+
     SHOW_MODERATORS = "Просмотр модераторов"
 
     ADD_MODERATOR = "Добавить модератора"
@@ -8,6 +9,7 @@ class AdminText:
     DELETE_MODERATOR = "Удалить модератора"
     DELETE_MODERATOR_SELECT = "Введите никнейм пользователя, которого вы удаляете из модераторов"
     DELETE_MODERATOR_SUCCESS = "Пользователь {} удален из модераторов"
+    DELETE_MODERATOR_DENIED = "Пользователя {} нет в модераторах"
 
     CANCEL = "Отмена"
     BACK_TO_MAIN = "Вернуться в основное меню"

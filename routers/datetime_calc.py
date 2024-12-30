@@ -12,7 +12,7 @@ from aiogram.utils.markdown import hbold
 
 from aiogram_calendar import SimpleCalendar, get_user_locale, SimpleCalendarCallback
 from resourses.text import CalcDatetimeText, CalcDatetimeText
-from routers.admin.moderate_user import is_staff
+from routers.admin.moderate_user import is_staff, is_admin
 from routers.keyboard.keyboards import CommonKeyboard
 
 router = Router(name=__name__)
@@ -21,16 +21,16 @@ class Form(StatesGroup):
     start_dt = State()
     end_dt = State()
 
-kb = CommonKeyboard()
-
 @router.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
+    kb = CommonKeyboard()
+    kb.is_admin = is_admin(message.from_user.username)
     text = f"Приветствую, {hbold(message.from_user.full_name)}! Выбери одну из команд"
     await message.reply(text, reply_markup=kb.main_state().markup())
 
 @router.message(F.text.lower() == CalcDatetimeText.CALC_CALENDAR.lower())
 async def nav_cal_handler(message: Message, state: FSMContext):
-    if not await is_staff(message.from_user.username):
+    if not await is_staff(message.from_user.username.lower()):
         await message.reply(f"Функция недоступна")
         return
 
@@ -74,6 +74,8 @@ async def process_start_calendar(callback_query: CallbackQuery, callback_data: C
 
 @router.callback_query(SimpleCalendarCallback.filter(), Form.end_dt)
 async def process_end_calendar(callback_query: CallbackQuery, callback_data: CallbackData, state: FSMContext):
+    kb = CommonKeyboard()
+    kb.is_admin = is_admin(callback_query.from_user.username)
     data = await state.get_data()
     loc = data["loc"]
     calendar = SimpleCalendar(
