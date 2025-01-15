@@ -24,7 +24,7 @@ class Form(StatesGroup):
 @router.message(CommandStart())
 async def command_start_handler(message: Message) -> None:
     kb = CommonKeyboard()
-    kb.is_admin = is_admin(message.from_user.username)
+    kb.is_admin = await is_admin(message.from_user.username)
     text = f"Приветствую, {hbold(message.from_user.full_name)}! Выбери одну из команд"
     await message.reply(text, reply_markup=kb.main_state().markup())
 

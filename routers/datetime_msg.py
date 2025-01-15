@@ -49,9 +49,12 @@ async def command_timedelta_handler(msg: Message, state: FSMContext) -> None:
 
 @router.message(MessageDateFSM.first)
 async def command_timedelta_first_handler(msg: Message, state: FSMContext):
+    kb = CommonKeyboard()
+    kb.is_admin = await is_admin(msg.from_user.username)
     text = msg.text or msg.caption
     if text.lower() == AdminText.CANCEL.lower():
-        await msg.answer("Отмена операции", kb=CommonKeyboard().main_state().markup())
+        await msg.answer("Отмена операции", reply_markup=kb.main_state().markup())
+        await state.clear()
         return
 
     date_str = text.split()[0]
@@ -66,6 +69,7 @@ async def command_timedelta_second_handler(msg: Message, bot: aiogram.Bot, state
     text = msg.text or msg.caption
     if text.lower() == AdminText.CANCEL.lower():
         await msg.answer("Отмена операции", kb=kb.main_state().markup())
+        await state.clear()
         return
 
     date2_str = text.split()[0]
