@@ -39,16 +39,14 @@ async def nav_cal_handler(message: Message, state: FSMContext):
     await state.update_data(loc=loc)
     await message.answer(
         "Выберите первую дату: ",
-        reply_markup=await SimpleCalendar(locale=loc).start_calendar()
+        reply_markup=await SimpleCalendar().start_calendar()
     )
 
 @router.callback_query(SimpleCalendarCallback.filter(), Form.start_dt)
 async def process_start_calendar(callback_query: CallbackQuery, callback_data: CallbackData, state: FSMContext):
     data = await state.get_data()
     loc = data["loc"]
-    calendar = SimpleCalendar(
-        locale=await get_user_locale(callback_query.from_user), show_alerts=True
-    )
+    calendar = SimpleCalendar(show_alerts=True)
     calendar.set_dates_range(
         datetime(2000, 1, 1),
         datetime(2029, 12, 31)
@@ -78,9 +76,7 @@ async def process_end_calendar(callback_query: CallbackQuery, callback_data: Cal
     kb.is_admin = is_admin(callback_query.from_user.username)
     data = await state.get_data()
     loc = data["loc"]
-    calendar = SimpleCalendar(
-        locale=loc, show_alerts=True
-    )
+    calendar = SimpleCalendar()
     calendar.set_dates_range(
         datetime(2000, 1, 1),
         datetime(2029, 12, 31)
