@@ -10,7 +10,7 @@ from aiogram.fsm.state import StatesGroup, State
 from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup, CallbackQuery, InputFile, URLInputFile
 from aiogram.utils.markdown import hbold
 
-from aiogram_calendar import SimpleCalendar, get_user_locale, SimpleCalendarCallback
+from aiogram_calendar import SimpleCalendar, SimpleCalendarCallback
 from resourses.text import CalcDatetimeText, CalcDatetimeText
 from routers.admin.moderate_user import is_staff, is_admin
 from routers.keyboard.keyboards import CommonKeyboard
@@ -35,8 +35,6 @@ async def nav_cal_handler(message: Message, state: FSMContext):
         return
 
     await state.set_state(Form.start_dt)
-    loc = await get_user_locale(message.from_user)
-    await state.update_data(loc=loc)
     await message.answer(
         "Выберите первую дату: ",
         reply_markup=await SimpleCalendar().start_calendar()
@@ -44,8 +42,6 @@ async def nav_cal_handler(message: Message, state: FSMContext):
 
 @router.callback_query(SimpleCalendarCallback.filter(), Form.start_dt)
 async def process_start_calendar(callback_query: CallbackQuery, callback_data: CallbackData, state: FSMContext):
-    data = await state.get_data()
-    loc = data["loc"]
     calendar = SimpleCalendar(show_alerts=True)
     calendar.set_dates_range(
         datetime(2000, 1, 1),
@@ -60,7 +56,7 @@ async def process_start_calendar(callback_query: CallbackQuery, callback_data: C
         )
         await callback_query.message.answer(
             "Выберите вторую дату: ",
-            reply_markup=await SimpleCalendar(locale=loc).start_calendar()
+            reply_markup=await SimpleCalendar().start_calendar()
         )
         await callback_query.message.delete()
     elif selected == "Cancel":
@@ -75,7 +71,6 @@ async def process_end_calendar(callback_query: CallbackQuery, callback_data: Cal
     kb = CommonKeyboard()
     kb.is_admin = is_admin(callback_query.from_user.username)
     data = await state.get_data()
-    loc = data["loc"]
     calendar = SimpleCalendar()
     calendar.set_dates_range(
         datetime(2000, 1, 1),
