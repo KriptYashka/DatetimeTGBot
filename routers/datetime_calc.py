@@ -117,9 +117,9 @@ async def process_end_calendar_delta_days(msg: Message, state: FSMContext):
     date2 = date1 + timedelta(days)
 
     if days >= 0:
-        text = f'📆Через {days} дня/дней от \n\n{date1.strftime("%d.%m.%Y")}\n\n будет \n\n{date2.strftime("%d.%m.%Y")}'
+        text = f'От: {date1.strftime("%d/%m/%Y")} ⏪ <i>Вы выбрали</i>\nДо: {date2.strftime("%d/%m/%Y")}\n📆 Количество дней датами: {days}'
     else:
-        text = f'📆{days * -1} дня/дней назад от \n\n{date1.strftime("%d.%m.%Y")}\n\n было \n\n{date2.strftime("%d.%m.%Y")}'
+        text = f'От: {date2.strftime("%d/%m/%Y")}\nДо: {date1.strftime("%d/%m/%Y")} ⏪ <i>Вы выбрали</i>\n📆 Количество дней датами: {days * -1}'
     photo = URLInputFile("https://freeimghost.net/images/2024/12/16/icon.jpg")
     await msg.answer_photo(
         photo=photo, caption=text, reply_markup=kb.main_state().markup(), show_caption_above_media=True

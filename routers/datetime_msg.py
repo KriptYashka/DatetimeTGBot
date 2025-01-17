@@ -102,6 +102,7 @@ async def command_timedelta_second_handler(msg: Message, bot: aiogram.Bot, state
 
         d, m, y = map(int, date1_str.split("."))
         date2 = datetime(y, m, d) + timedelta(days=days)
+        date1_str.replace(".", "/")
 
 
         msg_last = await state.get_value("first_msg")
@@ -110,9 +111,10 @@ async def command_timedelta_second_handler(msg: Message, bot: aiogram.Bot, state
 
         text = "Выше пересланные сообщения от вас\n\n"
         if days >= 0:
-            text += f'📆Через {days} дня/дней от \n\n{date1_str}\n\n будет \n\n{date2.strftime("%d.%m.%Y")}'
+            f'От: {date1_str}\nДо: {date2.strftime("%d/%m/%Y")}\n📆 Количество дней датами: {days}'
+            text += f'От: {date1_str} ⏪ <i>Вы выбрали</i>\nДо: {date2.strftime("%d/%m/%Y")}\n📆 Количество дней датами: {days}'
         else:
-            text += f'📆{days * -1} дня/дней назад от \n\n{date1_str}\n\n было \n\n{date2.strftime("%d.%m.%Y")}'
+            text += f'От: {date2.strftime("%d/%m/%Y")}\nДо: {date1_str} ⏪ <i>Вы выбрали</i>\n📆 Количество дней датами: {days * -1}'
         photo = URLInputFile("https://freeimghost.net/images/2024/12/16/icon.jpg")
         await msg.answer_photo(
             photo=photo, caption=text, reply_markup=kb.main_state().markup(), show_caption_above_media=True
