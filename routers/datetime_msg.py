@@ -1,4 +1,6 @@
 import logging
+import re
+from calendar import month
 from datetime import datetime, timedelta
 from typing import Any, Optional, Union
 
@@ -44,7 +46,7 @@ async def command_timedelta_handler(msg: Message, state: FSMContext) -> None:
         await msg.reply(f"Функция недоступна")
         return
     await state.set_state(MessageDateFSM.first)
-    await msg.reply("Введите первую дату", reply_markup=CommonKeyboard().input_state().markup())
+    await msg.reply("Введите первую дату (Пост)", reply_markup=CommonKeyboard().input_state().markup())
 
 
 @router.message(MessageDateFSM.first)
@@ -60,7 +62,7 @@ async def command_timedelta_first_handler(msg: Message, state: FSMContext):
     date_str = text.split()[0]
     await state.update_data(first=date_str, first_msg=msg)
     await state.set_state(MessageDateFSM.second)
-    await msg.reply("Введите вторую дату", reply_markup=CommonKeyboard().input_state().markup())
+    await msg.reply("Введите вторую дату или число дней", reply_markup=CommonKeyboard().input_state().markup())
 
 @router.message(MessageDateFSM.second)
 async def command_timedelta_second_handler(msg: Message, bot: aiogram.Bot, state: FSMContext):
@@ -72,22 +74,50 @@ async def command_timedelta_second_handler(msg: Message, bot: aiogram.Bot, state
         await state.clear()
         return
 
-    date2_str = text.split()[0]
     date1_str = await state.get_value("first")
-    delta_date, status = get_timedelta_urls(date1_str, date2_str)
 
-    if delta_date:
+    pattern = r"\d{1,2}.\d{1,2}\d{4}"  # Формат 31.12.2000
+    if match := re.search(pattern, text):
+        date2_str = match.group(0).split()[0]
+        delta_date, status = get_timedelta_urls(date1_str, date2_str)
+        if delta_date:
+            msg_last = await state.get_value("first_msg")
+            await msg_last.forward(msg.chat.id)
+            await msg.forward(msg.chat.id)
+
+            text = "Выше пересланные сообщения от вас\n\n"
+            text += f'От: {date1_str}\nДо: {date2_str}\n📆 Количество дней между выбранными датами: {delta_date.days} \n\n'
+            photo = URLInputFile("https://freeimghost.net/images/2024/12/16/icon.jpg")
+            await msg.answer_photo(
+                photo=photo, caption=text, reply_markup=kb.main_state().markup(), show_caption_above_media=True
+            )
+        else:
+            await msg.reply(status, reply_markup=kb.main_state().markup())
+    else:
+        if not text.isdigit():
+            await msg.reply("Неверный формат ввода")
+            return
+        days = int(text)
+        d, m, y = map(int, date1_str.split("."))
+        date2 = datetime(y, m, d) + timedelta(days=days)
+
+
         msg_last = await state.get_value("first_msg")
         await msg_last.forward(msg.chat.id)
         await msg.forward(msg.chat.id)
 
         text = "Выше пересланные сообщения от вас\n\n"
-        text += f'От: {date1_str}\nДо: {date2_str}\n📆 Количество дней между выбранными датами: {delta_date.days} \n\n'
+        if days >= 0:
+            text += f'📆Через {days} дней от \n\n{date1_str}\n\n будет \n\n{date2.strftime("%d.%m.%Y")}'
+        else:
+            text += f'📆{days} дня назад от \n\n{date1_str}\n\n было \n\n{date2.strftime("%d.%m.%Y")}'
         photo = URLInputFile("https://freeimghost.net/images/2024/12/16/icon.jpg")
         await msg.answer_photo(
             photo=photo, caption=text, reply_markup=kb.main_state().markup(), show_caption_above_media=True
         )
-    else:
-        await msg.reply(status, reply_markup=kb.main_state().markup())
     await state.clear()
+
+
+
+
 
