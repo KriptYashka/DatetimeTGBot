@@ -55,7 +55,7 @@ async def process_start_calendar(callback_query: CallbackQuery, callback_data: C
             f'Начало: {date.strftime("%d/%m/%Y")}'
         )
         await callback_query.message.answer(
-            "Выберите вторую дату: ",
+            "Выберите вторую дату или количество дней: ",
             reply_markup=await SimpleCalendar().start_calendar()
         )
         await callback_query.message.delete()
@@ -101,3 +101,27 @@ async def process_end_calendar(callback_query: CallbackQuery, callback_data: Cal
         )
         await callback_query.message.delete()
         await state.clear()
+
+@router.message(Form.end_dt)
+async def process_end_calendar_delta_days(msg: Message, state: FSMContext):
+    kb = CommonKeyboard()
+    kb.is_admin = await is_admin(msg.from_user.username)
+    text = msg.text
+    try:
+        days = int(text)
+    except TypeError:
+        await msg.reply("Неверный формат ввода, попробуйте снова.")
+        return
+
+    date1 = await state.get_value("dt")
+    date2 = date1 + timedelta(days)
+
+    if days >= 0:
+        text = f'📆Через {days} дня/дней от \n\n{date1.strftime("%d.%m.%Y")}\n\n будет \n\n{date2.strftime("%d.%m.%Y")}'
+    else:
+        text = f'📆{days * -1} дня/дней назад от \n\n{date1.strftime("%d.%m.%Y")}\n\n было \n\n{date2.strftime("%d.%m.%Y")}'
+    photo = URLInputFile("https://freeimghost.net/images/2024/12/16/icon.jpg")
+    await msg.answer_photo(
+        photo=photo, caption=text, reply_markup=kb.main_state().markup(), show_caption_above_media=True
+    )
+    await state.clear()
