@@ -46,7 +46,7 @@ async def command_timedelta_handler(msg: Message, state: FSMContext) -> None:
         await msg.reply(f"Функция недоступна")
         return
     await state.set_state(MessageDateFSM.first)
-    await msg.reply("Введите первую дату (Пост)", reply_markup=CommonKeyboard().input_state().markup())
+    await msg.reply("Введите первую дату", reply_markup=CommonKeyboard().input_state().markup())
 
 
 @router.message(MessageDateFSM.first)
@@ -62,7 +62,7 @@ async def command_timedelta_first_handler(msg: Message, state: FSMContext):
     date_str = text.split()[0]
     await state.update_data(first=date_str, first_msg=msg)
     await state.set_state(MessageDateFSM.second)
-    await msg.reply("Введите вторую дату или число дней", reply_markup=CommonKeyboard().input_state().markup())
+    await msg.reply("Введите вторую дату", reply_markup=CommonKeyboard().input_state().markup())
 
 @router.message(MessageDateFSM.second)
 async def command_timedelta_second_handler(msg: Message, bot: aiogram.Bot, state: FSMContext):

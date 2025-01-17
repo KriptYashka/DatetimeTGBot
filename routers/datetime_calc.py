@@ -55,7 +55,7 @@ async def process_start_calendar(callback_query: CallbackQuery, callback_data: C
             f'Начало: {date.strftime("%d/%m/%Y")}'
         )
         await callback_query.message.answer(
-            "Выберите вторую дату или количество дней: ",
+            "Выберите вторую дату:",
             reply_markup=await SimpleCalendar().start_calendar()
         )
         await callback_query.message.delete()
