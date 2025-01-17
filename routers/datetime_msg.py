@@ -70,7 +70,7 @@ async def command_timedelta_second_handler(msg: Message, bot: aiogram.Bot, state
     kb.is_admin = await is_admin(msg.from_user.username)
     text = msg.text or msg.caption
     if text.lower() == AdminText.CANCEL.lower():
-        await msg.answer("Отмена операции", kb=kb.main_state().markup())
+        await msg.answer("Отмена операции", reply_markup=kb.main_state().markup())
         await state.clear()
         return
 
@@ -94,10 +94,12 @@ async def command_timedelta_second_handler(msg: Message, bot: aiogram.Bot, state
         else:
             await msg.reply(status, reply_markup=kb.main_state().markup())
     else:
-        if not text.isdigit():
-            await msg.reply("Неверный формат ввода")
+        try:
+            days = int(text)
+        except TypeError:
+            await msg.reply("Неверный формат ввода, попробуйте снова.")
             return
-        days = int(text)
+
         d, m, y = map(int, date1_str.split("."))
         date2 = datetime(y, m, d) + timedelta(days=days)
 
@@ -108,9 +110,9 @@ async def command_timedelta_second_handler(msg: Message, bot: aiogram.Bot, state
 
         text = "Выше пересланные сообщения от вас\n\n"
         if days >= 0:
-            text += f'📆Через {days} дней от \n\n{date1_str}\n\n будет \n\n{date2.strftime("%d.%m.%Y")}'
+            text += f'📆Через {days} дня/дней от \n\n{date1_str}\n\n будет \n\n{date2.strftime("%d.%m.%Y")}'
         else:
-            text += f'📆{days} дня назад от \n\n{date1_str}\n\n было \n\n{date2.strftime("%d.%m.%Y")}'
+            text += f'📆{days * -1} дня/дней назад от \n\n{date1_str}\n\n было \n\n{date2.strftime("%d.%m.%Y")}'
         photo = URLInputFile("https://freeimghost.net/images/2024/12/16/icon.jpg")
         await msg.answer_photo(
             photo=photo, caption=text, reply_markup=kb.main_state().markup(), show_caption_above_media=True
