@@ -76,7 +76,7 @@ async def command_timedelta_second_handler(msg: Message, bot: aiogram.Bot, state
 
     date1_str = await state.get_value("first")
 
-    pattern = r"\d{1,2}.\d{1,2}\d{4}"  # Формат 31.12.2000
+    pattern = r"\d{1,2}\.\d{1,2}\.\d{4}"  # Формат 31.12.2000
     if match := re.search(pattern, text):
         date2_str = match.group(0).split()[0]
         delta_date, status = get_timedelta_urls(date1_str, date2_str)
@@ -96,7 +96,7 @@ async def command_timedelta_second_handler(msg: Message, bot: aiogram.Bot, state
     else:
         try:
             days = int(text)
-        except TypeError:
+        except:
             await msg.reply("Неверный формат ввода, попробуйте снова.")
             return
 
